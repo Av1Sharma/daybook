@@ -1,0 +1,7 @@
+.DS_Store
+.openai/
+build/
+release/
+node_modules/
+*.dmg
+*.zip

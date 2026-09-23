@@ -19,7 +19,7 @@ Serve `dist` with a local HTTP server, for example `python3 -m http.server 4173 
 
 Task data is saved in this browser's localStorage, under `daybook.notebook.v1`. There is no server task database, cross-device sync, or external integration. Different browser profiles and origins have separate notebooks. Clearing site data removes the notebook. “Back up notebook” downloads its JSON. The MVP exports backups; it does not yet have an in-app restore screen.
 
-The app starts empty. Screenshot tasks/history were design context and have not been silently imported. Categories reflect classes, coding, applications, projects, and personal tasks. Sample records used for testing exist only in the local test browser, not the site source.
+The app imports the five supplied screenshots once: 15 open tasks, 62 dated completion entries, and reference lists. Seven undated completion entries are kept in Reference notes and excluded from weekly totals. Monday/Friday deadlines remain unconfirmed notes; no exact due dates were invented. Existing browser tasks are preserved. The 2026 year follows the screenshot timestamp. Categories reflect classes, coding, applications, projects, and personal tasks. Sample records used for testing exist only in the local test browser, not the site source.
 
 ## Verification
 
@@ -38,3 +38,5 @@ Weekly backlog is reconstructed from created/completed/deleted dates. Editing an
 ## Publishing status
 
 A private Site was registered, but no version was published: the installed Sites publishing helper became unavailable during this session. The local application is complete and does not depend on that service.
+
+Screenshot history is partial; task creation times were not recorded. Imported entries do not count as newly added work. The app preserves historical day labels without displaying invented completion times.

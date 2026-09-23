@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mergeScreenshotData,screenshotTasks,screenshotNotes} from '../dist/screenshot-data.mjs';
+import {weekly} from '../dist/model.mjs';
+test('screenshot import preserves existing entries and runs once',()=>{const original={version:1,tasks:[{id:'user-task',title:'My own task'}]};const imported=mergeScreenshotData(original);assert.equal(imported.tasks.length,78);assert.equal(imported.tasks[0],original.tasks[0]);assert.equal(mergeScreenshotData(imported),imported);assert.equal(new Set(imported.tasks.map(t=>t.id)).size,78)});
+test('all visible dated history and open tasks are represented',()=>{assert.equal(screenshotTasks.filter(t=>!t.completedAt).length,15);assert.equal(screenshotTasks.filter(t=>t.completedAt).length,62);assert.equal(screenshotNotes[0].items.length,7);assert.equal(screenshotNotes[1].items.length,21);assert.equal(screenshotNotes[2].items.length,26);assert.equal(screenshotNotes[3].items.length,3);assert.equal(screenshotTasks.filter(t=>t.repeat==='daily').length,2)});
+test('unknown deadlines and times are not fabricated in imported records',()=>{const t=screenshotTasks.find(t=>t.title==='Poetry Essay');assert.equal(t.due,'');assert.match(t.sourceHint,/Monday/);assert.ok(screenshotTasks.filter(t=>t.completedAt).every(t=>t.dateOnlyCompletion));const w=weekly(screenshotTasks,'2026-09-21','2026-09-23');assert.equal(w.done.length,16);assert.deepEqual(w.days.map(d=>d.count),[7,8,1,0,0,0,0]);assert.equal(w.days.reduce((n,d)=>n+d.added,0),0)});

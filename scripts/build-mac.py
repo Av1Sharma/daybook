@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess, shutil, plistlib, os, re
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='1.0.0'
+VERSION='1.1.0'
 build=ROOT/'build'; release=ROOT/'release'; app=build/'Daybook.app'
 if app.exists():shutil.rmtree(app)
 resources=app/'Contents/Resources'; binaries=app/'Contents/MacOS'
@@ -11,7 +11,7 @@ resources.mkdir(parents=True); binaries.mkdir(parents=True);release.mkdir(exist_
 html=(ROOT/'dist/index.html').read_text()
 css=(ROOT/'dist/style.css').read_text()
 parts=[]
-for name in ['model.mjs','screenshot-data.mjs','app.js']:
+for name in ['model.mjs','screenshot-data.mjs','internships.mjs','app.js']:
     js=(ROOT/'dist'/name).read_text()
     js=re.sub(r'^import .*?;\n','',js,flags=re.M)
     js=re.sub(r'\bexport (?=(?:const|function|class)\b)','',js)
@@ -21,7 +21,7 @@ html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</st
 html=html.replace('</body>','<script type="module">'+js+'</script></body>')
 (resources/'index.html').write_text(html)
 with (app/'Contents/Info.plist').open('wb') as f:
-    plistlib.dump({'CFBundleExecutable':'Daybook','CFBundleIdentifier':'com.avisharma.daybook','CFBundleName':'Daybook','CFBundleDisplayName':'Daybook','CFBundlePackageType':'APPL','CFBundleShortVersionString':VERSION,'CFBundleVersion':'1','LSMinimumSystemVersion':'13.0','NSHighResolutionCapable':True,'NSPrincipalClass':'NSApplication','CFBundleIconFile':'Daybook.icns'},f)
+    plistlib.dump({'CFBundleExecutable':'Daybook','CFBundleIdentifier':'com.avisharma.daybook','CFBundleName':'Daybook','CFBundleDisplayName':'Daybook','CFBundlePackageType':'APPL','CFBundleShortVersionString':VERSION,'CFBundleVersion':'2','LSMinimumSystemVersion':'13.0','NSHighResolutionCapable':True,'NSPrincipalClass':'NSApplication','CFBundleIconFile':'Daybook.icns'},f)
 cache=build/'ModuleCache';cache.mkdir(exist_ok=True)
 for arch in ['arm64','x86_64']:
     subprocess.run(['swiftc','-O','-target',arch+'-apple-macos13.0','-module-cache-path',str(cache),str(ROOT/'macos/Daybook.swift'),'-o',str(build/('Daybook-'+arch))],check=True)

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+- Add a separate Internship reminders tab with three editable, reusable check-ins.
+- Keep company/search lists as reference material, excluded from task counts and backlog.
+- Keep OAs as actionable tasks in My day.
+- Preserve prior notebook data and completion history during the one-time migration.
+- Record reminder check-offs in DAY DONE; manually start the next check-in when notified by ChatGPT.
+
 ## 1.0.0
 
 - Personal task entry, quiet importance, due dates, categories, and optional effort.

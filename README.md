@@ -4,7 +4,7 @@ A personal task notebook based on Avi’s Notes workflow. Manually add tasks at 
 
 ## Mac app
 
-Download `Daybook-1.0.0-universal.dmg` from this private repository’s Releases, open it, and drag **Daybook** into **Applications**. It runs offline without Python, Node, a browser, or a local server.
+Download `Daybook-1.1.0-universal.dmg` from this private repository’s Releases, open it, and drag **Daybook** into **Applications**. It runs offline without Python, Node, a browser, or a local server.
 
 - Requires macOS 13 or later. The universal executable includes Apple silicon and Intel architectures.
 - This personal build is **ad-hoc signed, not Apple-notarized**. macOS may ask you to approve the first launch in System Settings → Privacy & Security.
@@ -20,6 +20,14 @@ Download `Daybook-1.0.0-universal.dmg` from this private repository’s Releases
 - Everyday and weekly repeats create one future occurrence, measured from the completion day. Missed days do not create duplicate backlogs. Future repeats cannot be completed early; edit their date to change the schedule.
 - Weekly review shows daily completions, category totals, unfinished and overdue work, estimated completed effort, and daily backlog. Today is partial. Future days have no backlog value, and future repeats are excluded from current unfinished counts.
 - Observations describe recorded activity without treating quiet days as poor productivity. Effort is an estimate, not tracked time.
+
+## Internship reminders
+
+Company names and search ideas live in the **Internship reminders** tab, together with application history and target-company reference lists. They are not open tasks and do not add to overdue/backlog totals. Actual online assessments (Johnson Johnson, Parsons, P&G) remain in **My day**.
+
+There are exactly three named reminder check-ins. Rename them to match the three existing ChatGPT reminders. Read a reminder in ChatGPT, apply to the relevant roles, and check it off in Daybook. Check-offs are recorded in DAY DONE and weekly totals. Choose **Ready for next reminder** when the next notification arrives; this keeps the previous completion in history. No notification schedules are invented, and no new ChatGPT reminders are created.
+
+The upgrade preserves existing tasks and history, moves the five imported company/search items to reference material, and replaces the generic “Spam Jobs” routine with the three check-ins. It leaves nine original actionable tasks in My day, including all three OAs. The migration runs once per notebook.
 
 ## Screenshot import
 

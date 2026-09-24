@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+
+- Automatically check private GitHub releases on launch and every six hours.
+- Offer Install & Relaunch, Later, and manual update checks in the Daybook menu.
+- Authenticate private downloads through the Mac’s existing GitHub CLI sign-in.
+- Verify signed manifests, archive hashes, bundle identity, and versions before installing.
+- Preserve the old app and restore it on replacement/launch-command failure; leave notebook data untouched.
+- Include signed update assets in every release build. Install this version manually once to enable future updates.
+
 ## 1.1.0
 
 - Add a separate Internship reminders tab with three editable, reusable check-ins.

@@ -4,13 +4,21 @@ A personal task notebook based on Avi’s Notes workflow. Manually add tasks at 
 
 ## Mac app
 
-Download `Daybook-1.1.0-universal.dmg` from this private repository’s Releases, open it, and drag **Daybook** into **Applications**. It runs offline without Python, Node, a browser, or a local server.
+Download `Daybook-1.2.0-universal.dmg` from this private repository’s Releases, open it, and drag **Daybook** into **Applications**. It runs offline without Python, Node, a browser, or a local server.
 
 - Requires macOS 13 or later. The universal executable includes Apple silicon and Intel architectures.
 - This personal build is **ad-hoc signed, not Apple-notarized**. macOS may ask you to approve the first launch in System Settings → Privacy & Security.
 - The app stores its notebook in `~/Library/Application Support/Daybook/notebook.json`. Writes replace the file atomically; failed writes are reported in the app.
 - Use **Back up notebook** to save a timestamped JSON copy in `~/Library/Application Support/Daybook/Backups/` and reveal it in Finder. Move that copy to another drive or folder if desired. Browser and native notebooks are separate. This version does not yet offer an in-app backup restore screen.
-- The app contains no external integrations and sends no task data to a server.
+- Task data stays on your Mac. The updater contacts GitHub only for release metadata and app downloads.
+
+## Automatic app updates
+
+Install 1.2.0 manually once; older releases have no updater. After that, Daybook checks its private GitHub releases shortly after launch and every six hours. Choose **Install & Relaunch** to download, verify, and replace the app. **Later** defers the prompt for 24 hours. The Daybook menu also offers **Check for Updates…** and a toggle for automatic checks.
+
+Private downloads use the GitHub CLI (`gh`) already installed and signed in on Avi’s Mac. Other Macs need GitHub CLI from cli.github.com and `gh auth login` with access to this private repository. No token is embedded in Daybook. A failed automatic check stays quiet; a manual check explains the failure. Task features work offline without GitHub CLI.
+
+Updates require a writable app folder, not a mounted DMG. The app verifies an Ed25519-signed manifest, archive size and SHA-256 hash, version, bundle identity, and code signature before installation. The installer preserves the old bundle as a hidden sibling `.Daybook.previous-…app` and restores it if replacement or its launch command fails. It never replaces your notebook file. This release signature is separate from Apple notarization; this remains an ad-hoc signed personal app.
 
 ## Workflow
 
@@ -58,9 +66,13 @@ Requires Apple command-line developer tools (Swift, SDK, codesign, hdiutil, icon
 ```sh
 node --test tests/*.test.mjs
 python3 scripts/build-mac.py
+swiftc -module-cache-path build/ModuleCache macos/Updates/UpdateCore.swift macos/Updates/UpdatePublicKey.swift macos/Updates/InstallCore.swift tests/UpdaterTests.swift -o build/updater-tests
+build/updater-tests
 ```
 
-The builder compiles both architectures, bundles the web UI into one offline document, generates the icon, applies an ad-hoc signature, creates the DMG, and verifies the image. Build products are ignored by Git and attached to the release.
+The builder compiles both architectures, bundles the web UI into one offline document, generates the icon, applies an ad-hoc signature, creates the DMG, and verifies the image. Build products are ignored by Git and attached to the release. The builder also creates `Daybook-update.zip`, `daybook-update.json`, `daybook-update.sig`, and versioned checksums; attach all of these alongside the DMG to every release. The updater uses the newest published, non-prerelease `vX.Y.Z` release.
+
+The release-signing private key lives only in the macOS Keychain, service `com.avisharma.daybook.release-signing`, account `ed25519-v1`. The public key is pinned in `macos/Updates/`. The build fails if that key is unavailable or mismatched; do not regenerate it for ordinary releases. Losing it requires a manual reinstall with a new trust key. `scripts/SignUpdate.swift initialize` was used only for initial setup.
 
 Core tests cover dates, validation, completion/reopen, recurrence, suggestions, weekly calculations, and idempotent screenshot import. Manual checks cover the browser and native app.
 
@@ -70,6 +82,7 @@ Core tests cover dates, validation, completion/reopen, recurrence, suggestions, 
 - `macos/Daybook.swift`: AppKit/WebKit shell, atomic notebook persistence, and native backup export.
 - `macos/Icon.swift`: application icon renderer.
 - `scripts/build-mac.py`: reproducible universal app and DMG build.
-- `tests/`: model and import tests.
+- `macos/Updates/`: private release checks, signature verification, and transactional installer.
+- `tests/`: model/import tests plus native updater verification and rollback tests.
 
 Backlog is reconstructed from created/completed/deleted dates. Editing a schedule or reopening an older task can revise historical unfinished counts; this is not an immutable event ledger.

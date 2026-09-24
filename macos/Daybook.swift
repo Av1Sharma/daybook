@@ -3,6 +3,8 @@ import WebKit
 import UniformTypeIdentifiers
 
 final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandlerWithReply, WKNavigationDelegate {
+    let updater = DaybookUpdater()
+    var updateInstalling = false
     var window: NSWindow!
     var web: WKWebView!
     var notebook: URL!
@@ -37,11 +39,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             window.contentView = web
             window.setFrameAutosaveName("DaybookMainWindow")
             window.center()
+            updater.window=window
+            updater.beforeInstall = { [weak self] in self?.updateInstalling=true;self?.web.evaluateJavaScript("document.body.inert=true") }
+            updater.installFailed = { [weak self] in self?.updateInstalling=false;self?.web.evaluateJavaScript("document.body.inert=false") }
             configureMenu()
             guard let page = Bundle.main.url(forResource:"index",withExtension:"html") else { throw NSError(domain:"Daybook",code:1,userInfo:[NSLocalizedDescriptionKey:"The bundled notebook page is missing."]) }
             web.loadFileURL(page,allowingReadAccessTo:page.deletingLastPathComponent())
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps:true)
+            updater.start()
         } catch {
             loadFailed = true
             let alert=NSAlert(); alert.messageText="Daybook couldn’t open your notebook"; alert.informativeText="Your existing data has not been replaced.\n\n"+error.localizedDescription;alert.runModal(); NSApp.terminate(nil)
@@ -56,6 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         guard message.frameInfo.isMainFrame, message.frameInfo.request.url?.isFileURL == true,let body=message.body as? [String:Any],let action=body["action"] as? String,let raw=body["json"] as? String,let data=raw.data(using:.utf8) else {replyHandler(nil,"Invalid notebook request");return}
         do {try validate(data)} catch {replyHandler(nil,error.localizedDescription);return}
         if action == "save" {
+            if updateInstalling {replyHandler(nil,"Wait for the update to finish before changing the notebook.");return}
             if loadFailed { replyHandler(nil,"The existing notebook could not be loaded.");return }
             pendingSaves += 1
             do {
@@ -92,6 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         let appItem=NSMenuItem();bar.addItem(appItem)
         let appMenu=NSMenu();appItem.submenu=appMenu
         appMenu.addItem(withTitle:"About Daybook",action:#selector(NSApplication.orderFrontStandardAboutPanel(_:)),keyEquivalent:"")
+        updater.addMenu(to:appMenu)
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle:"Hide Daybook",action:#selector(NSApplication.hide(_:)),keyEquivalent:"h")
         appMenu.addItem(withTitle:"Quit Daybook",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
@@ -100,8 +108,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         NSApp.mainMenu=bar
     }
 }
-let app = NSApplication.shared
-let delegate = AppDelegate()
-app.delegate=delegate
-app.setActivationPolicy(.regular)
-app.run()
+@main
+struct DaybookMain {
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate=delegate
+        app.setActivationPolicy(.regular)
+        withExtendedLifetime(delegate) { app.run() }
+    }
+}

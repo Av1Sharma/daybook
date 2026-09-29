@@ -1,88 +1,143 @@
 # Daybook
 
-A personal task notebook based on Avi’s Notes workflow. Manually add tasks at the top, check them off, and let Daybook keep a dated **DAY DONE** history.
+A personal task notebook for macOS. Write down what needs doing, check it off, and keep a dated record of what you finished.
 
-## Mac app
+Daybook turns a simple Notes-style list into a daily workspace with recurring tasks, weekly reviews, and a separate place for internship reminders. Your notebook stays on your device, and the Mac app works offline.
 
-Download `Daybook-1.2.0-universal.dmg` from this private repository’s Releases, open it, and drag **Daybook** into **Applications**. It runs offline without Python, Node, a browser, or a local server.
+## Install on macOS
 
-- Requires macOS 13 or later. The universal executable includes Apple silicon and Intel architectures.
-- This personal build is **ad-hoc signed, not Apple-notarized**. macOS may ask you to approve the first launch in System Settings → Privacy & Security.
-- The app stores its notebook in `~/Library/Application Support/Daybook/notebook.json`. Writes replace the file atomically; failed writes are reported in the app.
-- Use **Back up notebook** to save a timestamped JSON copy in `~/Library/Application Support/Daybook/Backups/` and reveal it in Finder. Move that copy to another drive or folder if desired. Browser and native notebooks are separate. This version does not yet offer an in-app backup restore screen.
-- Task data stays on your Mac. The updater contacts GitHub only for release metadata and app downloads.
+1. Open this repository’s [Releases](https://github.com/Av1Sharma/daybook/releases).
+2. Download `Daybook-1.2.0-universal.dmg`.
+3. Open the disk image and drag **Daybook** into **Applications**.
+4. Launch Daybook from Applications.
 
-## Automatic app updates
+Requires **macOS 13 or later**. The universal app supports Apple silicon and Intel Macs. No Python, Node.js, browser, or local server is needed to use the installed app.
 
-Install 1.2.0 manually once; older releases have no updater. After that, Daybook checks its private GitHub releases shortly after launch and every six hours. Choose **Install & Relaunch** to download, verify, and replace the app. **Later** defers the prompt for 24 hours. The Daybook menu also offers **Check for Updates…** and a toggle for automatic checks.
+This personal build is ad-hoc signed and **not Apple-notarized**. macOS may require first-launch approval in **System Settings → Privacy & Security**.
 
-Private downloads use the GitHub CLI (`gh`) already installed and signed in on Avi’s Mac. Other Macs need GitHub CLI from cli.github.com and `gh auth login` with access to this private repository. No token is embedded in Daybook. A failed automatic check stays quiet; a manual check explains the failure. Task features work offline without GitHub CLI.
+## Use your notebook
 
-Updates require a writable app folder, not a mounted DMG. The app verifies an Ed25519-signed manifest, archive size and SHA-256 hash, version, bundle identity, and code signature before installation. The installer preserves the old bundle as a hidden sibling `.Daybook.previous-…app` and restores it if replacement or its launch command fails. It never replaces your notebook file. This release signature is separate from Apple notarization; this remains an ad-hoc signed personal app.
+| View | What it’s for |
+| --- | --- |
+| **My day** | Add, organize, and complete tasks. New tasks appear at the top by default. |
+| **Day done** | Browse completed tasks by date. Reopen a task by clicking its checkmark. |
+| **Weekly review** | Review completions, categories, unfinished work, overdue tasks, and estimated effort. |
+| **Internship reminders** | Keep reusable application check-ins alongside company lists and application history. |
+| **Reference notes** | Store context and undated notes without adding them to your task backlog. |
 
-## Workflow
+Tasks can have a category, due date, importance, repeat schedule, and effort estimate. Use **Today**, **Tomorrow**, or **In a week** for quick deadlines. Change the list order to **Suggested** or **Due date** when useful.
 
-- Enter tasks at the top. Newest-first is the default; Suggested and Due date ordering are optional.
-- Add details for category, due date (Today/Tomorrow/In a week shortcuts), quiet importance, recurrence, and optional effort.
-- Check a task to move it into dated DAY DONE history. Undo, or click its check in history, to reopen it.
-- Everyday and weekly repeats create one future occurrence, measured from the completion day. Missed days do not create duplicate backlogs. Future repeats cannot be completed early; edit their date to change the schedule.
-- Weekly review shows daily completions, category totals, unfinished and overdue work, estimated completed effort, and daily backlog. Today is partial. Future days have no backlog value, and future repeats are excluded from current unfinished counts.
-- Observations describe recorded activity without treating quiet days as poor productivity. Effort is an estimate, not tracked time.
+### Recurring tasks
 
-## Internship reminders
+Completing an everyday or weekly task creates one future occurrence, scheduled from the completion day. Missed days do not generate a backlog of duplicates. Future occurrences cannot be completed early; edit the date to change their schedule.
 
-Company names and search ideas live in the **Internship reminders** tab, together with application history and target-company reference lists. They are not open tasks and do not add to overdue/backlog totals. Actual online assessments (Johnson Johnson, Parsons, P&G) remain in **My day**.
+### Weekly review
 
-There are exactly three named reminder check-ins. Rename them to match the three existing ChatGPT reminders. Read a reminder in ChatGPT, apply to the relevant roles, and check it off in Daybook. Check-offs are recorded in DAY DONE and weekly totals. Choose **Ready for next reminder** when the next notification arrives; this keeps the previous completion in history. No notification schedules are invented, and no new ChatGPT reminders are created.
+Review totals describe the activity you recorded. Effort is an estimate, not a timer, and quiet days are not treated as poor productivity.
 
-The upgrade preserves existing tasks and history, moves the five imported company/search items to reference material, and replaces the generic “Spam Jobs” routine with the three check-ins. It leaves nine original actionable tasks in My day, including all three OAs. The migration runs once per notebook.
+Today’s totals are partial. Future repeats are excluded from current unfinished counts, and future days have no backlog value. Backlog is reconstructed from task dates, so reopening a task or editing its schedule can change historical counts.
 
-## Screenshot import
+### Internship reminders
 
-The five supplied screenshots are imported once, preserving existing notebook entries:
+Three editable check-ins let you track action taken on your existing ChatGPT reminders. Rename each check-in to match its reminder, check it off after applying, and choose **Ready for next reminder** when the next notification arrives. Previous completions stay in Day done and weekly totals.
 
-- **15 open tasks**, including two Everyday routines.
-- **62 dated completion entries**, across August 24–September 23, 2026.
-- **7 undated completion entries**, kept in Reference notes rather than assigned an invented date.
-- **21 application entries**, including their role/location notes.
-- **26 target companies** and the **3 original project ideas**.
+Daybook does not create or schedule ChatGPT notifications. Company lists and search ideas are reference material; actionable tasks such as online assessments stay in My day.
 
-The screenshot timestamp supplies the year 2026. “Monday” and “Friday” remain notes until an exact deadline is chosen. Imported completions display their day without an invented time. Creation dates were not recorded, so imports do not count as newly added work. Missing history and earlier workload counts remain incomplete. Company availability notes are historical screenshot text, not verified current job listings.
+## Storage and backups
+
+The Mac app saves its notebook here:
+
+```text
+~/Library/Application Support/Daybook/notebook.json
+```
+
+Saves replace the file atomically, and the app reports write failures. **Back up notebook** creates a timestamped JSON copy in the adjacent `Backups` folder and reveals it in Finder. Copy that backup to another drive or folder for an additional safeguard.
+
+There is no in-app backup restore screen in version 1.2.0. App updates leave the notebook file untouched.
+
+The native app and browser version keep **separate notebooks**. They do not sync with each other.
+
+## App updates
+
+Install version 1.2.0 manually once to enable the updater. Daybook then checks this private repository’s releases shortly after launch and every six hours.
+
+- **Install & Relaunch** downloads and installs the update.
+- **Later** postpones the prompt for 24 hours.
+- The **Daybook** menu provides **Check for Updates…** and an automatic-checks toggle.
+
+Private release downloads use an existing GitHub CLI (`gh`) sign-in with access to this repository. No token is embedded in the app. On another Mac, install GitHub CLI and run `gh auth login` to enable updates. Task features still work offline without it.
+
+Automatic check failures stay quiet; manual checks explain failures. Install updates from a writable app folder, not a mounted disk image.
+
+Before installation, Daybook verifies the signed update manifest, archive size and SHA-256 hash, version, bundle identity, and code signature. The installer keeps the previous app as a hidden sibling and restores it if replacement or the launch command fails. Update signing is separate from Apple notarization.
 
 ## Browser version
 
-Double-click `Start Daybook.command` on a Mac with Python 3, or run:
+With Python 3 installed, double-click `Start Daybook.command`. Keep its terminal window open while using Daybook.
+
+Alternatively, run this from the repository root:
 
 ```sh
-python3 -m http.server 4173 --directory dist
+python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
 ```
 
-Open `http://localhost:4173`. Use the same browser and address each time. Browser data is in localStorage under `daybook.notebook.v1`; clearing site data removes it. The native app uses its own file and does not share browser localStorage.
+Open `http://localhost:4173` and use the same browser and address each time. The notebook is stored in localStorage under `daybook.notebook.v1`. Clearing that site’s browser data removes its notebook.
 
-## Build and test
+## Imported history
 
-Requires Apple command-line developer tools (Swift, SDK, codesign, hdiutil, iconutil, lipo), Python 3, and Node for the model tests.
+This personal edition includes a one-time import from five Notes screenshots. It preserves existing notebook entries and includes tasks, dated completions, application notes, target companies, and project ideas.
+
+Unknown dates remain unknown: undated completions stay in Reference notes, weekday-only deadlines remain notes, and imported completions do not receive invented times. Imported tasks have no recorded creation dates and do not count as newly added work. Company availability notes reflect the original screenshots, not live job listings.
+
+The internship-reminder migration also runs once per notebook. It moves company/search items into reference material and replaces the old generic application routine with three reusable check-ins, preserving prior history.
+
+## Development
+
+The interface is shared between the browser app and an AppKit/WebKit macOS shell.
+
+| Path | Contents |
+| --- | --- |
+| `dist/` | Browser interface, task logic, and import data; also bundled into the Mac app. |
+| `macos/Daybook.swift` | Native shell, notebook persistence, and backup export. |
+| `macos/Updates/` | Release checks, update verification, and installation. |
+| `macos/Icon.swift` | App icon renderer. |
+| `scripts/build-mac.py` | Universal app, disk image, and signed update builder. |
+| `tests/` | Task, import, reminder, and native updater tests. |
+
+### Test and build
+
+Building requires Apple command-line developer tools, Python 3, and access to the existing release-signing key. JavaScript tests require Node.js.
 
 ```sh
+# Test task logic, imports, and reminders.
 node --test tests/*.test.mjs
+
+# Build the universal app, DMG, and signed update assets.
 python3 scripts/build-mac.py
-swiftc -module-cache-path build/ModuleCache macos/Updates/UpdateCore.swift macos/Updates/UpdatePublicKey.swift macos/Updates/InstallCore.swift tests/UpdaterTests.swift -o build/updater-tests
+
+# Build and run native updater tests.
+swiftc -module-cache-path build/ModuleCache \
+  macos/Updates/UpdateCore.swift \
+  macos/Updates/UpdatePublicKey.swift \
+  macos/Updates/InstallCore.swift \
+  tests/UpdaterTests.swift \
+  -o build/updater-tests
 build/updater-tests
 ```
 
-The builder compiles both architectures, bundles the web UI into one offline document, generates the icon, applies an ad-hoc signature, creates the DMG, and verifies the image. Build products are ignored by Git and attached to the release. The builder also creates `Daybook-update.zip`, `daybook-update.json`, `daybook-update.sig`, and versioned checksums; attach all of these alongside the DMG to every release. The updater uses the newest published, non-prerelease `vX.Y.Z` release.
+### Publish a release
 
-The release-signing private key lives only in the macOS Keychain, service `com.avisharma.daybook.release-signing`, account `ed25519-v1`. The public key is pinned in `macos/Updates/`. The build fails if that key is unavailable or mismatched; do not regenerate it for ordinary releases. Losing it requires a manual reinstall with a new trust key. `scripts/SignUpdate.swift initialize` was used only for initial setup.
+The builder compiles both Mac architectures, bundles the interface for offline use, generates the icon, signs the app ad hoc, and verifies the disk image. Build products are ignored by Git.
 
-Core tests cover dates, validation, completion/reopen, recurrence, suggestions, weekly calculations, and idempotent screenshot import. Manual checks cover the browser and native app.
+Attach the following assets to each published `vX.Y.Z` release:
 
-## Implementation
+- The versioned universal DMG.
+- `Daybook-update.zip`.
+- `daybook-update.json` and `daybook-update.sig`.
+- The versioned checksum file.
 
-- `dist/`: browser application, shared task logic, and screenshot import.
-- `macos/Daybook.swift`: AppKit/WebKit shell, atomic notebook persistence, and native backup export.
-- `macos/Icon.swift`: application icon renderer.
-- `scripts/build-mac.py`: reproducible universal app and DMG build.
-- `macos/Updates/`: private release checks, signature verification, and transactional installer.
-- `tests/`: model/import tests plus native updater verification and rollback tests.
+The updater selects the newest published, non-prerelease version.
 
-Backlog is reconstructed from created/completed/deleted dates. Editing a schedule or reopening an older task can revise historical unfinished counts; this is not an immutable event ledger.
+The Ed25519 private signing key stays in macOS Keychain under service `com.avisharma.daybook.release-signing`, account `ed25519-v1`; its public key is pinned in `macos/Updates/`. Builds fail when the key is missing or mismatched. Do not regenerate it for routine releases. Losing the key requires a manual reinstall with a new trust key; `scripts/SignUpdate.swift initialize` is for initial setup only.
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.

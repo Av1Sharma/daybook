@@ -1,3 +1,9 @@
+## Live demo and technology
+
+[Open Daybook in your browser](https://av1sharma.github.io/daybook/). The browser edition keeps its notebook in that browser on your device; the separate Mac app can be installed from the Releases section below.
+
+Daybook uses a shared web interface built with JavaScript and CSS, plus a small Swift shell for the macOS app. You can use the live browser demo right away, or install the native Mac app using the steps below.
+
 # Daybook
 
 A personal task notebook for macOS. Write down what needs doing, check it off, and keep a dated record of what you finished.

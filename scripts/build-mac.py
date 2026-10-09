@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess, shutil, plistlib, os, re, json, hashlib
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='1.2.0'
+VERSION='1.3.0'
 build=ROOT/'build'; release=ROOT/'release'; app=build/'Daybook.app'
 if app.exists():shutil.rmtree(app)
 resources=app/'Contents/Resources'; binaries=app/'Contents/MacOS'

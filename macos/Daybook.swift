@@ -103,9 +103,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle:"Hide Daybook",action:#selector(NSApplication.hide(_:)),keyEquivalent:"h")
         appMenu.addItem(withTitle:"Quit Daybook",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
+        let fileItem=NSMenuItem();bar.addItem(fileItem);let fileMenu=NSMenu(title:"File");fileItem.submenu=fileMenu
+        let restore=NSMenuItem(title:"Restore Notebook from Backup…",action:#selector(restoreNotebook),keyEquivalent:"");restore.target=self;fileMenu.addItem(restore)
         let edit=NSMenuItem();bar.addItem(edit);let menu=NSMenu(title:"Edit");edit.submenu=menu
         for (title,selector,key) in [("Undo","undo:","z"),("Cut","cut:","x"),("Copy","copy:","c"),("Paste","paste:","v"),("Select All","selectAll:","a")] {menu.addItem(withTitle:title,action:NSSelectorFromString(selector),keyEquivalent:key)}
         NSApp.mainMenu=bar
+    }
+
+    @objc func restoreNotebook() {
+        let panel=NSOpenPanel();panel.title="Choose a Daybook backup";panel.message="Select a Daybook JSON backup to replace the notebook on this Mac.";panel.allowedContentTypes=[.json];panel.allowsMultipleSelection=false;panel.canChooseDirectories=false
+        guard panel.runModal() == .OK, let source=panel.url else {return}
+        do {
+            let data=try Data(contentsOf:source)
+            try validate(data)
+            let confirm=NSAlert();confirm.messageText="Replace this notebook?";confirm.informativeText="Restoring this backup replaces the current Daybook notebook on this Mac. This cannot be undone from inside Daybook.";confirm.alertStyle = .warning;confirm.addButton(withTitle:"Restore Notebook");confirm.addButton(withTitle:"Cancel")
+            guard confirm.runModal() == .alertFirstButtonReturn else {return}
+            try data.write(to:notebook,options:.atomic)
+            let encoded=data.base64EncodedString()
+            web.evaluateJavaScript("window.daybookNative.initial = new TextDecoder().decode(Uint8Array.from(atob('\\(encoded)'), c => c.charCodeAt(0))); window.location.reload();")
+        } catch {
+            let alert=NSAlert();alert.messageText="Daybook couldn’t restore this backup";alert.informativeText=error.localizedDescription;alert.alertStyle = .critical;alert.runModal()
+        }
     }
 }
 @main

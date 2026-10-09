@@ -59,7 +59,7 @@ The Mac app saves its notebook here:
 
 Saves replace the file atomically, and the app reports write failures. **Back up notebook** creates a timestamped JSON copy in the adjacent `Backups` folder and reveals it in Finder. Copy that backup to another drive or folder for an additional safeguard.
 
-There is no in-app backup restore screen in version 1.2.0. App updates leave the notebook file untouched.
+To restore a backup in the Mac app, choose **File → Restore Notebook from Backup…**, select a Daybook JSON backup, and confirm the replacement. Daybook validates the backup before showing the confirmation; canceling or selecting an invalid file leaves the current notebook unchanged. App updates leave the notebook file untouched.
 
 The native app and browser version keep **separate notebooks**. They do not sync with each other.
 

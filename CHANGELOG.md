@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0 — Calendar
+
+- Added October–November 2026 Calendar with course filters, keyboard date navigation, event detail, tentative dates, and break shading.
+- Calendar events and optional cadence rules stay in the local notebook; public builds include no personal schedule.
+- Persisted calendar records in notebook backups and linked optional My day tasks without duplicates. Existing dated notebook tasks appear in the calendar.
+- Bundled the calendar offline in the native Mac app and added an app-only build option.
+
 ## 1.2.0
 
 - Automatically check private GitHub releases on launch and every six hours.

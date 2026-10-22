@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build an offline, universal macOS Daybook.app and drag-to-install DMG."""
 from pathlib import Path
-import subprocess, shutil, plistlib, os, re, json, hashlib
+import subprocess, shutil, plistlib, os, re, json, hashlib, sys
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='1.3.0'
+VERSION='1.4.0'
 build=ROOT/'build'; release=ROOT/'release'; app=build/'Daybook.app'
 if app.exists():shutil.rmtree(app)
 resources=app/'Contents/Resources'; binaries=app/'Contents/MacOS'
@@ -11,7 +11,7 @@ resources.mkdir(parents=True); binaries.mkdir(parents=True);release.mkdir(exist_
 html=(ROOT/'dist/index.html').read_text()
 css=(ROOT/'dist/style.css').read_text()
 parts=[]
-for name in ['model.mjs','screenshot-data.mjs','internships.mjs','app.js']:
+for name in ['model.mjs','screenshot-data.mjs','internships.mjs','calendar.mjs','calendar-view.mjs','app.js']:
     js=(ROOT/'dist'/name).read_text()
     js=re.sub(r'^import .*?;\n','',js,flags=re.M)
     js=re.sub(r'\bexport (?=(?:const|function|class)\b)','',js)
@@ -21,7 +21,7 @@ html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</st
 html=html.replace('</body>','<script type="module">'+js+'</script></body>')
 (resources/'index.html').write_text(html)
 with (app/'Contents/Info.plist').open('wb') as f:
-    plistlib.dump({'CFBundleExecutable':'Daybook','CFBundleIdentifier':'com.avisharma.daybook','CFBundleName':'Daybook','CFBundleDisplayName':'Daybook','CFBundlePackageType':'APPL','CFBundleShortVersionString':VERSION,'CFBundleVersion':'3','LSMinimumSystemVersion':'13.0','NSHighResolutionCapable':True,'NSPrincipalClass':'NSApplication','CFBundleIconFile':'Daybook.icns'},f)
+    plistlib.dump({'CFBundleExecutable':'Daybook','CFBundleIdentifier':'com.avisharma.daybook','CFBundleName':'Daybook','CFBundleDisplayName':'Daybook','CFBundlePackageType':'APPL','CFBundleShortVersionString':VERSION,'CFBundleVersion':'5','LSMinimumSystemVersion':'13.0','NSHighResolutionCapable':True,'NSPrincipalClass':'NSApplication','CFBundleIconFile':'Daybook.icns'},f)
 cache=build/'ModuleCache';cache.mkdir(exist_ok=True)
 shared=[ROOT/'macos/Updates/UpdateCore.swift',ROOT/'macos/Updates/UpdatePublicKey.swift',ROOT/'macos/Updates/InstallCore.swift']
 for arch in ['arm64','x86_64']:
@@ -34,6 +34,9 @@ subprocess.run(['swift','-module-cache-path',str(cache),str(ROOT/'macos/Icon.swi
 subprocess.run(['iconutil','-c','icns',str(build/'Daybook.iconset'),'-o',str(resources/'Daybook.icns')],check=True)
 subprocess.run(['codesign','--force','--sign','-','--identifier','com.avisharma.daybook',str(app)],check=True)
 subprocess.run(['codesign','--verify','--deep','--strict',str(app)],check=True)
+if '--app-only' in sys.argv:
+    print(app)
+    sys.exit(0)
 stage=build/'dmg-stage'
 if stage.exists():shutil.rmtree(stage)
 stage.mkdir();shutil.copytree(app,stage/'Daybook.app',symlinks=True)

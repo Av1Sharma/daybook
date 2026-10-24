@@ -34,6 +34,14 @@ This personal build is ad-hoc signed and **not Apple-notarized**. macOS may requ
 
 Tasks can have a category, due date, importance, repeat schedule, and effort estimate. Use **Today**, **Tomorrow**, or **In a week** for quick deadlines. Change the list order to **Suggested** or **Due date** when useful.
 
+### Desktop task window and reminders
+
+In the Mac app, choose **Desktop → Show / Hide Task Window** (Shift–Command–T). A compact task window stays above other windows and appears across desktops. It lists open My day tasks in deadline order, with overdue labels; select a task to open its editor. Completed, deleted, reference, internship check-in, and future recurring tasks stay out of this list. Its visibility is remembered between launches.
+
+Choose **Desktop → Reminder Settings…** to opt into notifications every 1–168 hours, days, or weeks. macOS asks for notification permission when enabled. Reminders begin a full interval after Save or app launch and appear only when actionable tasks remain. They are general check-ins, not individual deadline alarms. Daybook must remain running; closing its windows keeps it running, and **Daybook → Quit Daybook** stops reminders. Selecting a notification opens My day.
+
+Desktop settings are stored beside the native notebook in `desktop-preferences.json`. Browser notebooks and notebook backups do not include these Mac-specific preferences.
+
 ### Recurring tasks
 
 Completing an everyday or weekly task creates one future occurrence, scheduled from the completion day. Missed days do not generate a backlog of duplicates. Future occurrences cannot be completed early; edit the date to change their schedule.
@@ -118,6 +126,11 @@ Building requires Apple command-line developer tools, Python 3, and access to th
 ```sh
 # Test task logic, imports, and reminders.
 node --test tests/*.test.mjs
+
+# Test native desktop task selection and reminder preferences.
+mkdir -p build/ModuleCache
+swiftc -module-cache-path build/ModuleCache macos/DesktopCore.swift tests/DesktopTests.swift -o build/desktop-tests
+build/desktop-tests
 
 # Build the universal app, DMG, and signed update assets.
 python3 scripts/build-mac.py

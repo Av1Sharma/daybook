@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     var loadFailed = false
     var pendingSaves = 0
     var terminateAfterSave = false
+    let desktop = DesktopCompanion()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         do {
@@ -35,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             web.navigationDelegate = self
             window = NSWindow(contentRect:NSRect(x:0,y:0,width:1280,height:850),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
             window.title = "Daybook"
+            window.isReleasedWhenClosed = false
             window.minSize = NSSize(width:680,height:500)
             window.contentView = web
             window.setFrameAutosaveName("DaybookMainWindow")
@@ -46,6 +48,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             guard let page = Bundle.main.url(forResource:"index",withExtension:"html") else { throw NSError(domain:"Daybook",code:1,userInfo:[NSLocalizedDescriptionKey:"The bundled notebook page is missing."]) }
             web.loadFileURL(page,allowingReadAccessTo:page.deletingLastPathComponent())
             window.makeKeyAndOrderFront(nil)
+            desktop.openTask = { [weak self] id in
+                guard let self else { return }
+                self.window.makeKeyAndOrderFront(nil)
+                NSApp.activate(ignoringOtherApps: true)
+                let arguments: [Any] = [id as Any? ?? NSNull()]
+                if let data = try? JSONSerialization.data(withJSONObject: arguments), let json = String(data: data, encoding: .utf8) {
+                    self.web.evaluateJavaScript("window.daybookOpenTask?.(...\(json));")
+                }
+            }
+            desktop.start(folder: folder)
             NSApp.activate(ignoringOtherApps:true)
             updater.start()
         } catch {
@@ -68,6 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             do {
                 // Atomic replacement prevents a partial notebook when an app or machine stops mid-write.
                 try data.write(to:notebook,options:.atomic)
+                desktop.update(data)
                 replyHandler(["saved":true],nil)
             } catch {replyHandler(nil,error.localizedDescription)}
             pendingSaves -= 1
@@ -93,7 +106,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         if pendingSaves > 0 {terminateAfterSave=true;return .terminateLater};return .terminateNow
     }
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender:NSApplication)->Bool {true}
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender:NSApplication)->Bool {false}
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        window.makeKeyAndOrderFront(nil); return true
+    }
     func configureMenu() {
         let bar=NSMenu()
         let appItem=NSMenuItem();bar.addItem(appItem)
@@ -105,6 +121,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         appMenu.addItem(withTitle:"Quit Daybook",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
         let fileItem=NSMenuItem();bar.addItem(fileItem);let fileMenu=NSMenu(title:"File");fileItem.submenu=fileMenu
         let restore=NSMenuItem(title:"Restore Notebook from Backup…",action:#selector(restoreNotebook),keyEquivalent:"");restore.target=self;fileMenu.addItem(restore)
+        let desktopItem=NSMenuItem();bar.addItem(desktopItem);let desktopMenu=NSMenu(title:"Desktop");desktopItem.submenu=desktopMenu
+        let toggle=NSMenuItem(title:"Show / Hide Task Window",action:#selector(DesktopCompanion.toggle),keyEquivalent:"t");toggle.keyEquivalentModifierMask=[.command,.shift];toggle.target=desktop;desktopMenu.addItem(toggle)
+        let reminders=NSMenuItem(title:"Reminder Settings…",action:#selector(DesktopCompanion.showSettings),keyEquivalent:"");reminders.target=desktop;desktopMenu.addItem(reminders)
         let edit=NSMenuItem();bar.addItem(edit);let menu=NSMenu(title:"Edit");edit.submenu=menu
         for (title,selector,key) in [("Undo","undo:","z"),("Cut","cut:","x"),("Copy","copy:","c"),("Paste","paste:","v"),("Select All","selectAll:","a")] {menu.addItem(withTitle:title,action:NSSelectorFromString(selector),keyEquivalent:key)}
         NSApp.mainMenu=bar
@@ -119,8 +138,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             let confirm=NSAlert();confirm.messageText="Replace this notebook?";confirm.informativeText="Restoring this backup replaces the current Daybook notebook on this Mac. This cannot be undone from inside Daybook.";confirm.alertStyle = .warning;confirm.addButton(withTitle:"Restore Notebook");confirm.addButton(withTitle:"Cancel")
             guard confirm.runModal() == .alertFirstButtonReturn else {return}
             try data.write(to:notebook,options:.atomic)
-            let encoded=data.base64EncodedString()
-            web.evaluateJavaScript("window.daybookNative.initial = new TextDecoder().decode(Uint8Array.from(atob('\\(encoded)'), c => c.charCodeAt(0))); window.location.reload();")
+            desktop.update(data)
+            let payload = try JSONSerialization.data(withJSONObject: ["initial": String(decoding: data, as: UTF8.self)]).base64EncodedString()
+            let setup = "window.daybookNative = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob('\(payload)'), c => c.charCodeAt(0))));"
+            web.configuration.userContentController.removeAllUserScripts()
+            web.configuration.userContentController.addUserScript(WKUserScript(source: setup, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+            web.reload()
         } catch {
             let alert=NSAlert();alert.messageText="Daybook couldn’t restore this backup";alert.informativeText=error.localizedDescription;alert.alertStyle = .critical;alert.runModal()
         }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.0 — Desktop tasks and reminders
+
+- Added a floating desktop task window with deadline ordering, overdue labels, and task editor links.
+- Added opt-in notifications every 1–168 hours, days, or weeks while Daybook is running.
+- Remember desktop visibility and reminder preferences locally; reopen the notebook from the Dock after closing its windows.
+- Fixed the backup restore bridge to interpolate the selected backup before reloading the interface.
+- Added native tests for actionable task filtering and reminder interval validation.
+
 ## 1.4.0 — Calendar
 
 - Added October–November 2026 Calendar with course filters, keyboard date navigation, event detail, tentative dates, and break shading.

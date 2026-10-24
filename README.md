@@ -26,6 +26,7 @@ This personal build is ad-hoc signed and **not Apple-notarized**. macOS may requ
 | View | What it’s for |
 | --- | --- |
 | **My day** | Add, organize, and complete tasks. New tasks appear at the top by default. |
+| **Calendar** | October–November 2026 course deadlines, exams, and dated notebook tasks. |
 | **Day done** | Browse completed tasks by date. Reopen a task by clicking its checkmark. |
 | **Weekly review** | Review completions, categories, unfinished work, overdue tasks, and estimated effort. |
 | **Internship reminders** | Keep reusable application check-ins alongside company lists and application history. |
@@ -147,3 +148,19 @@ The updater selects the newest published, non-prerelease version.
 The Ed25519 private signing key stays in macOS Keychain under service `com.avisharma.daybook.release-signing`, account `ed25519-v1`; its public key is pinned in `macos/Updates/`. Builds fail when the key is missing or mismatched. Do not regenerate it for routine releases. Losing the key requires a manual reinstall with a new trust key; `scripts/SignUpdate.swift initialize` is for initial setup only.
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+### October–November 2026 calendar
+
+Choose **Calendar** in the sidebar (`#calendar`). Both months appear together on wide windows and stack in smaller windows. Filter by subject or dated notebook tasks; select a date and then an event for full details. Arrow keys move between dates, Home/End within the week, and Page Up/Down between months.
+
+Calendar entries are stored locally in `calendarEvents` in the existing version 1 notebook and are included in its backups. Public source and builds contain no personal deadline, exam, break, or cadence schedule. Existing notebooks retain their own event data on update. Undated tasks and unspecified deadlines are not assigned invented dates.
+
+Each event has `id`, `course`, `date` (YYYY-MM-DD), `title`, and `kind`. Optional fields include `time`, `endTime`, `endDate`, `notes`, `source`, `location`, and `tentative`. Date ranges are inclusive. Confirmed single-date events can create one linked My day task using `calendarEventId`, with completion status reflected in the calendar.
+
+Optional local `calendarCadences` rules use `id`, `course`, `weekdays` (Sunday = 0), and `title`, with optional `startDate` and `endDate`. They render as cadence reminders, avoid local break events, and do not assert exact assignment deadlines.
+
+To build the offline native app without generating signed release assets:
+
+```sh
+python3 scripts/build-mac.py --app-only
+```

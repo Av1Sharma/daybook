@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess, shutil, plistlib, os, re, json, hashlib, sys
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='1.4.0'
+VERSION='1.5.0'
 build=ROOT/'build'; release=ROOT/'release'; app=build/'Daybook.app'
 if app.exists():shutil.rmtree(app)
 resources=app/'Contents/Resources'; binaries=app/'Contents/MacOS'
@@ -21,11 +21,11 @@ html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</st
 html=html.replace('</body>','<script type="module">'+js+'</script></body>')
 (resources/'index.html').write_text(html)
 with (app/'Contents/Info.plist').open('wb') as f:
-    plistlib.dump({'CFBundleExecutable':'Daybook','CFBundleIdentifier':'com.avisharma.daybook','CFBundleName':'Daybook','CFBundleDisplayName':'Daybook','CFBundlePackageType':'APPL','CFBundleShortVersionString':VERSION,'CFBundleVersion':'5','LSMinimumSystemVersion':'13.0','NSHighResolutionCapable':True,'NSPrincipalClass':'NSApplication','CFBundleIconFile':'Daybook.icns'},f)
+    plistlib.dump({'CFBundleExecutable':'Daybook','CFBundleIdentifier':'com.avisharma.daybook','CFBundleName':'Daybook','CFBundleDisplayName':'Daybook','CFBundlePackageType':'APPL','CFBundleShortVersionString':VERSION,'CFBundleVersion':'6','LSMinimumSystemVersion':'13.0','NSHighResolutionCapable':True,'NSPrincipalClass':'NSApplication','CFBundleIconFile':'Daybook.icns'},f)
 cache=build/'ModuleCache';cache.mkdir(exist_ok=True)
 shared=[ROOT/'macos/Updates/UpdateCore.swift',ROOT/'macos/Updates/UpdatePublicKey.swift',ROOT/'macos/Updates/InstallCore.swift']
 for arch in ['arm64','x86_64']:
-    for name, files in [('Daybook',[ROOT/'macos/Daybook.swift',ROOT/'macos/Updates/Updater.swift',*shared]),('DaybookInstaller',[ROOT/'macos/Updates/InstallerMain.swift',*shared])]:
+    for name, files in [('Daybook',[ROOT/'macos/Daybook.swift',ROOT/'macos/DesktopCore.swift',ROOT/'macos/DesktopCompanion.swift',ROOT/'macos/Updates/Updater.swift',*shared]),('DaybookInstaller',[ROOT/'macos/Updates/InstallerMain.swift',*shared])]:
         subprocess.run(['swiftc','-O','-target',arch+'-apple-macos13.0','-module-cache-path',str(cache),*map(str,files),'-o',str(build/(name+'-'+arch))],check=True)
 subprocess.run(['lipo','-create',str(build/'DaybookInstaller-arm64'),str(build/'DaybookInstaller-x86_64'),'-output',str(binaries/'DaybookInstaller')],check=True)
 subprocess.run(['codesign','--force','--sign','-',str(binaries/'DaybookInstaller')],check=True)

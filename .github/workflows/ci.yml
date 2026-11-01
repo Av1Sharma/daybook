@@ -1,0 +1,33 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: pip install -e '.[test]'
+      - run: pytest -q
+      - run: node --check meridian/static/app.js
+      - run: node --check meridian/static/calendar.js
+      - run: node --check meridian/static/notebook.js
+      - run: node --test tests/calendar.test.cjs
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swiftc tests/DesktopTests.swift macos/DesktopCore.swift -o /tmp/meridian-desktop-tests && /tmp/meridian-desktop-tests
+      - run: swiftc tests/UpdaterTests.swift macos/Updates/UpdateCore.swift macos/Updates/UpdatePublicKey.swift macos/Updates/InstallCore.swift -o /tmp/meridian-updater-tests && /tmp/meridian-updater-tests
+      - run: swiftc macos/Daybook.swift macos/DesktopCore.swift macos/DesktopCompanion.swift macos/Updates/Updater.swift macos/Updates/UpdateCore.swift macos/Updates/UpdatePublicKey.swift macos/Updates/InstallCore.swift -o /tmp/Daybook
+      - run: swiftc macos/Updates/InstallerMain.swift macos/Updates/UpdateCore.swift macos/Updates/UpdatePublicKey.swift macos/Updates/InstallCore.swift -o /tmp/DaybookInstaller

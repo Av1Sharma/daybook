@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#174f48" />
+    <title>Daybook</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/calendar.js" defer></script>
+    <script src="/static/notebook.js" defer></script>
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Daybook home"><img class="meridian-symbol" src="/static/favicon.svg" alt="" />Daybook</a>
+      <nav class="primary-nav" aria-label="Main navigation">
+<button data-view="today" class="nav"><span data-icon="sun"></span>Today</button><button data-view="tasks" class="nav"><span data-icon="check"></span>All tasks<span id="task-count" class="count">0</span></button><button data-view="calendar" class="nav"><span data-icon="calendar"></span>Calendar</button><button data-view="done" class="nav"><span data-icon="check"></span>Day done</button></nav>
+      <nav class="secondary-nav" aria-label="Other views"><button data-view="weekly" class="nav"><span data-icon="chart"></span>Week done</button><button data-view="sources" class="nav"><span data-icon="link"></span>Connections<span class="connection-dots" aria-hidden="true"><span id="canvas-dot" class="status-dot"></span><span id="gmail-dot" class="status-dot"></span></span></button></nav>
+      <div class="sidebar-bottom"><span class="quiet-local">On your Mac</span></div>
+    </aside>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="breadcrumb">
+          <b id="crumb">Today</b>
+        </div>
+        <div class="top-actions">
+          <button id="sync" class="button subtle">
+            <span data-icon="refresh"></span>Sync Gmail</button
+          ><button id="add-task" class="button dark">
+            <span data-icon="plus"></span>Add task
+          </button>
+        </div>
+      </header>
+      <main id="main" tabindex="-1"><div id="view"></div></main>
+    </div>
+    <dialog id="modal" aria-labelledby="modal-title">
+      <div class="dialog-head">
+        <h2 id="modal-title"></h2>
+        <button class="icon-button" id="close-modal" aria-label="Close dialog">
+          ×
+        </button>
+      </div>
+      <div id="modal-body"></div>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

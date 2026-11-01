@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 import Security
 
-let service = "com.avisharma.daybook.release-signing"
+let service = "com.avisharma.meridian.release-signing"
 let account = "ed25519-v1"
 func load(create: Bool) throws -> Curve25519.Signing.PrivateKey {
     let query: [String:Any] = [kSecClass as String:kSecClassGenericPassword,kSecAttrService as String:service,kSecAttrAccount as String:account,kSecReturnData as String:true,kSecMatchLimit as String:kSecMatchLimitOne]

@@ -1,42 +1,7 @@
 # Changelog
 
-## 1.5.0 — Desktop tasks and reminders
+## 2.0.0
 
-- Added a floating desktop task window with deadline ordering, overdue labels, and task editor links.
-- Added opt-in notifications every 1–168 hours, days, or weeks while Daybook is running.
-- Remember desktop visibility and reminder preferences locally; reopen the notebook from the Dock after closing its windows.
-- Fixed the backup restore bridge to interpolate the selected backup before reloading the interface.
-- Added native tests for actionable task filtering and reminder interval validation.
+Continue Daybook with the local workspace previously developed as Meridian. Simplify task and weekly views, retain Calendar and Day done, add preview-first PDF/text syllabus imports, and keep existing notebook and connection storage compatible. Remove Courses, Date checks, demo switching, Reference notes, Notebook & backups, and Reminders from navigation. Trash recovery is available through the All tasks status filter.
 
-## 1.4.0 — Calendar
-
-- Added October–November 2026 Calendar with course filters, keyboard date navigation, event detail, tentative dates, and break shading.
-- Calendar events and optional cadence rules stay in the local notebook; public builds include no personal schedule.
-- Persisted calendar records in notebook backups and linked optional My day tasks without duplicates. Existing dated notebook tasks appear in the calendar.
-- Bundled the calendar offline in the native Mac app and added an app-only build option.
-
-## 1.2.0
-
-- Automatically check private GitHub releases on launch and every six hours.
-- Offer Install & Relaunch, Later, and manual update checks in the Daybook menu.
-- Authenticate private downloads through the Mac’s existing GitHub CLI sign-in.
-- Verify signed manifests, archive hashes, bundle identity, and versions before installing.
-- Preserve the old app and restore it on replacement/launch-command failure; leave notebook data untouched.
-- Include signed update assets in every release build. Install this version manually once to enable future updates.
-
-## 1.1.0
-
-- Add a separate Internship reminders tab with three editable, reusable check-ins.
-- Keep company/search lists as reference material, excluded from task counts and backlog.
-- Keep OAs as actionable tasks in My day.
-- Preserve prior notebook data and completion history during the one-time migration.
-- Record reminder check-offs in DAY DONE; manually start the next check-in when notified by ChatGPT.
-
-## 1.0.0
-
-- Personal task entry, quiet importance, due dates, categories, and optional effort.
-- Automatic dated DAY DONE history, undo/reopen, and daily/weekly recurrence.
-- Weekly completions, unfinished/overdue work, and workload observations.
-- One-time import of Avi’s five Notes screenshots; preserve unknown dates and existing tasks.
-- Standalone universal macOS app, local atomic notebook storage, and timestamped native backup export with Finder reveal.
-- Ad-hoc signed DMG for personal installation; no Apple notarization.
+Earlier releases remain in Git history and GitHub releases.

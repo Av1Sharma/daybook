@@ -11,8 +11,8 @@ struct InstallerMain {
             if let data=try? JSONSerialization.data(withJSONObject:record){try? data.write(to:URL(fileURLWithPath:job.resultFile),options:.atomic)}
         }
         func launch(_ app:URL) throws {
-            var args=["-n",app.path,"--env","DAYBOOK_UPDATE_RESULT="+job.resultFile]
-            if let directory=job.dataDirectory {args += ["--env","DAYBOOK_DATA_DIRECTORY="+directory]}
+            var args=["-n",app.path,"--env","MERIDIAN_UPDATE_RESULT="+job.resultFile]
+            if let directory=job.dataDirectory {args += ["--env","MERIDIAN_DATA_DIRECTORY="+directory]}
             _ = try UpdateProcess.run("/usr/bin/open",args,timeout:30)
         }
         do {

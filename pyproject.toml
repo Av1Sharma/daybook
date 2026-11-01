@@ -1,0 +1,19 @@
+[project]
+name = "daybook-planner"
+version = "2.0.0"
+description = "A local, source-backed academic and career planner"
+requires-python = ">=3.11"
+dependencies = ["fastapi==0.162.0", "uvicorn==0.54.0", "httpx==0.28.1", "pypdf==6.21.4"]
+[project.optional-dependencies]
+test = ["pytest==9.2.0"]
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[tool.setuptools.package-data]
+meridian = ["static/*"]
+[tool.setuptools.packages.find]
+include = ["meridian*"]
+exclude = ["tests*"]

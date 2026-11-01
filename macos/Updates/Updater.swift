@@ -13,7 +13,7 @@ final class DaybookUpdater: NSObject {
     private let current=Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "0.0.0"
     private var checkItem: NSMenuItem!
     private var automaticItem: NSMenuItem!
-    private let autoKey="daybook.automaticallyCheckForUpdates"
+    private let autoKey="meridian.automaticallyCheckForUpdates"
     private var automatic: Bool {defaults.object(forKey:autoKey)==nil || defaults.bool(forKey:autoKey)}
 
     func addMenu(to menu:NSMenu) {
@@ -23,13 +23,13 @@ final class DaybookUpdater: NSObject {
         automaticItem.target=self;automaticItem.state=automatic ? .on : .off
     }
     func start() {
-        if let path=ProcessInfo.processInfo.environment["DAYBOOK_UPDATE_RESULT"],
+        if let path=ProcessInfo.processInfo.environment["MERIDIAN_UPDATE_RESULT"],
            let bytes=try? Data(contentsOf:URL(fileURLWithPath:path)),
            let record=try? JSONSerialization.jsonObject(with:bytes) as? [String:Any],let message=record["message"] as? String {
             DispatchQueue.main.async {self.alert("Daybook update",message)}
         }
         // Test copies can disable background networking without changing the app's ordinary default.
-        guard ProcessInfo.processInfo.environment["DAYBOOK_DISABLE_AUTO_CHECK"] != "1" else {return}
+        guard ProcessInfo.processInfo.environment["MERIDIAN_DISABLE_AUTO_CHECK"] != "1" else {return}
         DispatchQueue.main.asyncAfter(deadline:.now()+8) { [weak self] in if self?.automatic == true {self?.check(manual:false)} }
         timer=Timer.scheduledTimer(withTimeInterval:6*60*60,repeats:true){[weak self] _ in
             Task {@MainActor in if self?.automatic == true {self?.check(manual:false)}}
@@ -57,7 +57,7 @@ final class DaybookUpdater: NSObject {
     }
     private func offer(_ update:UpdateCandidate,manual:Bool) {
         guard let window,window.attachedSheet==nil else {return}
-        let key="daybook.deferUpdate."+update.manifest.version
+        let key="meridian.deferUpdate."+update.manifest.version
         if !manual,let until=defaults.object(forKey:key) as? Date,until>Date(){return}
         let panel=NSAlert();panel.messageText="Daybook "+update.manifest.version+" is available"
         panel.informativeText="Install the signed update from your private GitHub repository and reopen Daybook. Your tasks, history, and reminders stay on this Mac."
@@ -91,7 +91,7 @@ final class DaybookUpdater: NSObject {
                     let staged=parent.appendingPathComponent(".Daybook.update-"+id+".app")
                     let backup=parent.appendingPathComponent(".Daybook.previous-"+id+".app")
                     let fm=FileManager.default
-                    let job=InstallJob(destination:destination.path,staged:staged.path,backup:backup.path,parentPID:ProcessInfo.processInfo.processIdentifier,previousVersion:oldVersion,version:update.manifest.version,resultFile:update.folder.appendingPathComponent("result.json").path,dataDirectory:ProcessInfo.processInfo.environment["DAYBOOK_DATA_DIRECTORY"])
+                    let job=InstallJob(destination:destination.path,staged:staged.path,backup:backup.path,parentPID:ProcessInfo.processInfo.processIdentifier,previousVersion:oldVersion,version:update.manifest.version,resultFile:update.folder.appendingPathComponent("result.json").path,dataDirectory:ProcessInfo.processInfo.environment["MERIDIAN_DATA_DIRECTORY"])
                     do {
                         try fm.copyItem(at:prepared,to:staged)
                         try AppInstaller.validatePaths(job)

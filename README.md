@@ -1,179 +1,54 @@
-## Live demo and technology
-
-[Open Daybook in your browser](https://av1sharma.github.io/daybook/). The browser edition keeps its notebook in that browser on your device; the separate Mac app can be installed from the Releases section below.
-
-Daybook uses a shared web interface built with JavaScript and CSS, plus a small Swift shell for the macOS app. You can use the live browser demo right away, or install the native Mac app using the steps below.
-
 # Daybook
 
-A personal task notebook for macOS. Write down what needs doing, check it off, and keep a dated record of what you finished.
+A local Mac task notebook: Today, All tasks, Calendar, Day done, and Week done. This is the continuation of Daybook, incorporating the local Python service and Gmail integration previously developed as Meridian.
 
-Daybook turns a simple Notes-style list into a daily workspace with recurring tasks, weekly reviews, and a separate place for internship reminders. Your notebook stays on your device, and the Mac app works offline.
+## What changed in 2.0
 
-## Install on macOS
+- Today shows tasks due today or overdue, with no scheduling dashboard.
+- All tasks has search and one status filter (Open, Completed, Trash).
+- Week done is a simple weekly completion history.
+- Syllabus imports preview dates before saving. Choose Calendar only, Task + calendar, or Skip. Past dates default to Calendar only; uncertain dates stay unsaved until corrected.
+- PDF/text import runs locally. Date-only deadlines remain date-only; unknown times and TBA dates are never invented.
+- Repeated imports do not duplicate records or reopen completed tasks.
+- The existing Calendar and Day done views remain available. Connections holds import and Gmail setup.
 
-1. Open this repository’s [Releases](https://github.com/Av1Sharma/daybook/releases).
-2. Download `Daybook-1.2.0-universal.dmg`.
-3. Open the disk image and drag **Daybook** into **Applications**.
-4. Launch Daybook from Applications.
+## Run from source
 
-Requires **macOS 13 or later**. The universal app supports Apple silicon and Intel Macs. No Python, Node.js, browser, or local server is needed to use the installed app.
-
-This personal build is ad-hoc signed and **not Apple-notarized**. macOS may require first-launch approval in **System Settings → Privacy & Security**.
-
-## Use your notebook
-
-| View | What it’s for |
-| --- | --- |
-| **My day** | Add, organize, and complete tasks. New tasks appear at the top by default. |
-| **Calendar** | October–November 2026 course deadlines, exams, and dated notebook tasks. |
-| **Day done** | Browse completed tasks by date. Reopen a task by clicking its checkmark. |
-| **Weekly review** | Review completions, categories, unfinished work, overdue tasks, and estimated effort. |
-| **Internship reminders** | Keep reusable application check-ins alongside company lists and application history. |
-| **Reference notes** | Store context and undated notes without adding them to your task backlog. |
-
-Tasks can have a category, due date, importance, repeat schedule, and effort estimate. Use **Today**, **Tomorrow**, or **In a week** for quick deadlines. Change the list order to **Suggested** or **Due date** when useful.
-
-### Desktop task window and reminders
-
-In the Mac app, choose **Desktop → Show / Hide Task Window** (Shift–Command–T). A compact task window stays above other windows and appears across desktops. It lists open My day tasks in deadline order, with overdue labels; select a task to open its editor. Completed, deleted, reference, internship check-in, and future recurring tasks stay out of this list. Its visibility is remembered between launches.
-
-Choose **Desktop → Reminder Settings…** to opt into notifications every 1–168 hours, days, or weeks. macOS asks for notification permission when enabled. Reminders begin a full interval after Save or app launch and appear only when actionable tasks remain. They are general check-ins, not individual deadline alarms. Daybook must remain running; closing its windows keeps it running, and **Daybook → Quit Daybook** stops reminders. Selecting a notification opens My day.
-
-Desktop settings are stored beside the native notebook in `desktop-preferences.json`. Browser notebooks and notebook backups do not include these Mac-specific preferences.
-
-### Recurring tasks
-
-Completing an everyday or weekly task creates one future occurrence, scheduled from the completion day. Missed days do not generate a backlog of duplicates. Future occurrences cannot be completed early; edit the date to change their schedule.
-
-### Weekly review
-
-Review totals describe the activity you recorded. Effort is an estimate, not a timer, and quiet days are not treated as poor productivity.
-
-Today’s totals are partial. Future repeats are excluded from current unfinished counts, and future days have no backlog value. Backlog is reconstructed from task dates, so reopening a task or editing its schedule can change historical counts.
-
-### Internship reminders
-
-Three editable check-ins let you track action taken on your existing ChatGPT reminders. Rename each check-in to match its reminder, check it off after applying, and choose **Ready for next reminder** when the next notification arrives. Previous completions stay in Day done and weekly totals.
-
-Daybook does not create or schedule ChatGPT notifications. Company lists and search ideas are reference material; actionable tasks such as online assessments stay in My day.
-
-## Storage and backups
-
-The Mac app saves its notebook here:
-
-```text
-~/Library/Application Support/Daybook/notebook.json
-```
-
-Saves replace the file atomically, and the app reports write failures. **Back up notebook** creates a timestamped JSON copy in the adjacent `Backups` folder and reveals it in Finder. Copy that backup to another drive or folder for an additional safeguard.
-
-To restore a backup in the Mac app, choose **File → Restore Notebook from Backup…**, select a Daybook JSON backup, and confirm the replacement. Daybook validates the backup before showing the confirmation; canceling or selecting an invalid file leaves the current notebook unchanged. App updates leave the notebook file untouched.
-
-The native app and browser version keep **separate notebooks**. They do not sync with each other.
-
-## App updates
-
-Install version 1.2.0 manually once to enable the updater. Daybook then checks this private repository’s releases shortly after launch and every six hours.
-
-- **Install & Relaunch** downloads and installs the update.
-- **Later** postpones the prompt for 24 hours.
-- The **Daybook** menu provides **Check for Updates…** and an automatic-checks toggle.
-
-Private release downloads use an existing GitHub CLI (`gh`) sign-in with access to this repository. No token is embedded in the app. On another Mac, install GitHub CLI and run `gh auth login` to enable updates. Task features still work offline without it.
-
-Automatic check failures stay quiet; manual checks explain failures. Install updates from a writable app folder, not a mounted disk image.
-
-Before installation, Daybook verifies the signed update manifest, archive size and SHA-256 hash, version, bundle identity, and code signature. The installer keeps the previous app as a hidden sibling and restores it if replacement or the launch command fails. Update signing is separate from Apple notarization.
-
-## Browser version
-
-With Python 3 installed, double-click `Start Daybook.command`. Keep its terminal window open while using Daybook.
-
-Alternatively, run this from the repository root:
+Requires Python 3.11+ and Node.js for JavaScript checks.
 
 ```sh
-python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
+python3 -m venv .venv
+.venv/bin/pip install -e '.[test]'
+.venv/bin/python -m uvicorn meridian.app:app --host 127.0.0.1 --port 18765
 ```
 
-Open `http://localhost:4173` and use the same browser and address each time. The notebook is stored in localStorage under `daybook.notebook.v1`. Clearing that site’s browser data removes its notebook.
+Open `http://127.0.0.1:18765`. The internal Python package, environment variables, local port, bundle identifier and Keychain service retain their `meridian` names for compatibility. They do not identify a separate app.
 
-## Imported history
-
-This personal edition includes a one-time import from five Notes screenshots. It preserves existing notebook entries and includes tasks, dated completions, application notes, target companies, and project ideas.
-
-Unknown dates remain unknown: undated completions stay in Reference notes, weekday-only deadlines remain notes, and imported completions do not receive invented times. Imported tasks have no recorded creation dates and do not count as newly added work. Company availability notes reflect the original screenshots, not live job listings.
-
-The internship-reminder migration also runs once per notebook. It moves company/search items into reference material and replaces the old generic application routine with three reusable check-ins, preserving prior history.
-
-## Development
-
-The interface is shared between the browser app and an AppKit/WebKit macOS shell.
-
-| Path | Contents |
-| --- | --- |
-| `dist/` | Browser interface, task logic, and import data; also bundled into the Mac app. |
-| `macos/Daybook.swift` | Native shell, notebook persistence, and backup export. |
-| `macos/Updates/` | Release checks, update verification, and installation. |
-| `macos/Icon.swift` | App icon renderer. |
-| `scripts/build-mac.py` | Universal app, disk image, and signed update builder. |
-| `tests/` | Task, import, reminder, and native updater tests. |
-
-### Test and build
-
-Building requires Apple command-line developer tools, Python 3, and access to the existing release-signing key. JavaScript tests require Node.js.
+## Mac app
 
 ```sh
-# Test task logic, imports, and reminders.
-node --test tests/*.test.mjs
-
-# Test native desktop task selection and reminder preferences.
-mkdir -p build/ModuleCache
-swiftc -module-cache-path build/ModuleCache macos/DesktopCore.swift tests/DesktopTests.swift -o build/desktop-tests
-build/desktop-tests
-
-# Build the universal app, DMG, and signed update assets.
-python3 scripts/build-mac.py
-
-# Build and run native updater tests.
-swiftc -module-cache-path build/ModuleCache \
-  macos/Updates/UpdateCore.swift \
-  macos/Updates/UpdatePublicKey.swift \
-  macos/Updates/InstallCore.swift \
-  tests/UpdaterTests.swift \
-  -o build/updater-tests
-build/updater-tests
+.venv/bin/python scripts/build-mac.py
 ```
 
-### Publish a release
+The build creates `../Daybook.app`, with a bundled virtual environment, native task window, and verified signed-update support. The local build uses the installed Python framework; it is not a portable or notarized distribution.
 
-The builder compiles both Mac architectures, bundles the interface for offline use, generates the icon, signs the app ad hoc, and verifies the disk image. Build products are ignored by Git.
+Existing Meridian installations continue using `~/Library/Application Support/Meridian`, including the SQLite notebook, connection metadata, backups and preferences. Credentials remain in the same macOS Keychain service. Original Daybook JSON notebooks can be merged with the existing validated notebook migration API; the originals remain untouched. Renaming the app does not move, overwrite or silently merge another notebook.
 
-Attach the following assets to each published `vX.Y.Z` release:
+## Imports and privacy
 
-- The versioned universal DMG.
-- `Daybook-update.zip`.
-- `daybook-update.json` and `daybook-update.sig`.
-- The versioned checksum file.
+Use Connections → Import syllabus, supply a course and year, then choose a PDF or paste dated assignment lines. Review every extracted row before saving. Complex PDF tables may need corrected dates in the preview; a date is required for every selected row. Importing old coursework does not claim that it was completed.
 
-The updater selects the newest published, non-prerelease version.
+Gmail is optional and read-only. Only interview emails with clear dates become tasks. Google OAuth credentials are configured locally, not bundled or stored in this repository. Database contents are plaintext on the local filesystem; credentials are excluded from notebook exports. Local write requests require an in-memory token and same-origin validation.
 
-The Ed25519 private signing key stays in macOS Keychain under service `com.avisharma.daybook.release-signing`, account `ed25519-v1`; its public key is pinned in `macos/Updates/`. Builds fail when the key is missing or mismatched. Do not regenerate it for routine releases. Losing the key requires a manual reinstall with a new trust key; `scripts/SignUpdate.swift initialize` is for initial setup only.
+Personal syllabi, screenshots, notebooks, databases, account settings, credentials, and built app bundles are not included in the source repository.
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
-
-### October–November 2026 calendar
-
-Choose **Calendar** in the sidebar (`#calendar`). Both months appear together on wide windows and stack in smaller windows. Filter by subject or dated notebook tasks; select a date and then an event for full details. Arrow keys move between dates, Home/End within the week, and Page Up/Down between months.
-
-Calendar entries are stored locally in `calendarEvents` in the existing version 1 notebook and are included in its backups. Public source and builds contain no personal deadline, exam, break, or cadence schedule. Existing notebooks retain their own event data on update. Undated tasks and unspecified deadlines are not assigned invented dates.
-
-Each event has `id`, `course`, `date` (YYYY-MM-DD), `title`, and `kind`. Optional fields include `time`, `endTime`, `endDate`, `notes`, `source`, `location`, and `tentative`. Date ranges are inclusive. Confirmed single-date events can create one linked My day task using `calendarEventId`, with completion status reflected in the calendar.
-
-Optional local `calendarCadences` rules use `id`, `course`, `weekdays` (Sunday = 0), and `title`, with optional `startDate` and `endDate`. They render as cadence reminders, avoid local break events, and do not assert exact assignment deadlines.
-
-To build the offline native app without generating signed release assets:
+## Validation
 
 ```sh
-python3 scripts/build-mac.py --app-only
+.venv/bin/python -m pytest -q
+node --check meridian/static/app.js
+node --check meridian/static/notebook.js
+node --test tests/calendar.test.cjs
 ```
+
+CI also compiles the Mac app and runs desktop and updater security tests. Signed update metadata must use the pinned verification key; older Daybook 1.x update signatures are not accepted by the 2.x updater. Updates are sourced exclusively from `Av1Sharma/daybook`. The former frontend is retained in this repository’s Git history.

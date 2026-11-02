@@ -11,6 +11,7 @@ final class DesktopCompanion: NSObject, NSWindowDelegate, UNUserNotificationCent
     private var panel: NSPanel!
     private var stack: NSStackView!
     private var tasks: [DesktopTask] = []
+    private var lastRefresh = Date.distantPast
     private var settings: NSPanel?
     private var countField: NSTextField!
     private var unitPicker: NSPopUpButton!
@@ -47,15 +48,17 @@ final class DesktopCompanion: NSObject, NSWindowDelegate, UNUserNotificationCent
         panel.contentView!.addSubview(scroll)
         NSLayoutConstraint.activate([stack.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor)])
         UNUserNotificationCenter.current().delegate = self
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in self?.reload(folder: folder) }
+        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in self?.reload(folder: folder) }
         reload(folder: folder)
         scheduleReminder()
         if preferences.visible { panel.orderFront(nil) }
     }
 
     func reload(folder: URL) {
-        guard let data = try? Data(contentsOf: folder.appendingPathComponent("notebook.json")) else { return }
-        update(data)
+        URLSession.shared.dataTask(with: URL(string: "http://127.0.0.1:18765/api/desktop")!) { [weak self] data, response, _ in
+            guard let data, (response as? HTTPURLResponse)?.statusCode == 200 else { return }
+            DispatchQueue.main.async { self?.update(data) }
+        }.resume()
     }
 
     func update(_ data: Data) {
@@ -63,6 +66,7 @@ final class DesktopCompanion: NSObject, NSWindowDelegate, UNUserNotificationCent
         let today = formatter.string(from: Date())
         guard let pending = try? DesktopTask.pending(in: data, today: today) else { return }
         tasks = pending
+        lastRefresh = Date()
         stack.arrangedSubviews.forEach { stack.removeArrangedSubview($0); $0.removeFromSuperview() }
         let heading = NSTextField(labelWithString: "\(tasks.count) open \(tasks.count == 1 ? "task" : "tasks")")
         heading.font = .boldSystemFont(ofSize: 16)
@@ -165,20 +169,21 @@ final class DesktopCompanion: NSObject, NSWindowDelegate, UNUserNotificationCent
     private var reminderTimer: Timer?
     func scheduleReminder() {
         reminderTimer?.invalidate(); reminderTimer = nil
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daybook-open-tasks"])
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["meridian-open-tasks"])
         guard preferences.reminders, let interval = preferences.interval else { return }
         reminderTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-            guard let self, !self.tasks.isEmpty else { return }
+            guard let self, !self.tasks.isEmpty, Date().timeIntervalSince(self.lastRefresh) < 30 else { return }
             let content = UNMutableNotificationContent()
             content.title = "A moment for your tasks"
             content.body = "\(self.tasks.count) open \(self.tasks.count == 1 ? "task" : "tasks") in Daybook. Open My day to choose your next step."
             content.sound = .default
-            let request = UNNotificationRequest(identifier: "daybook-open-tasks", content: content, trigger: nil)
+            let request = UNNotificationRequest(identifier: "meridian-open-tasks", content: content, trigger: nil)
             UNUserNotificationCenter.current().add(request) { error in
                 if let error { NSLog("Daybook reminder failed: %@", error.localizedDescription) }
             }
         }
     }
+    func stop() { timer?.invalidate(); reminderTimer?.invalidate(); UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["meridian-open-tasks"]) }
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) { completionHandler([.banner, .sound]) }
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         DispatchQueue.main.async { [weak self] in self?.openTask?(nil) }

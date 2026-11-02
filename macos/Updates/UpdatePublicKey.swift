@@ -1,2 +1,2 @@
-// Public verification key. The private signing key stays in the macOS Keychain.
-let daybookUpdatePublicKey = "s9puBkGDo09dTvZklsV+AFl8ZU9h2VaqR4kAYMhUpuA="
+// Public verification key. Private signing key stays in macOS Keychain.
+let meridianUpdatePublicKey = "FKna7dQF67vcVQlA3zfOGcc9YDqEcbQ+5vM2gsk+8RU="

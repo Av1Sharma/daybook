@@ -38,10 +38,10 @@ struct UpdateCandidate {
 enum UpdateSecurity {
     static let repository = "Av1Sharma/daybook"
     static let archiveName = "Daybook-update.zip"
-    static let manifestName = "daybook-update.json"
-    static let signatureName = "daybook-update.sig"
-    static let bundleID = "com.avisharma.daybook"
-    static func manifest(_ data: Data, signature: Data, publicKey: String = daybookUpdatePublicKey) throws -> UpdateManifest {
+    static let manifestName = "meridian-update.json"
+    static let signatureName = "meridian-update.sig"
+    static let bundleID = "com.avisharma.meridian"
+    static func manifest(_ data: Data, signature: Data, publicKey: String = meridianUpdatePublicKey) throws -> UpdateManifest {
         guard data.count <= 65536, signature.count <= 256,
               let keyBytes = Data(base64Encoded: publicKey),
               let signatureText = String(data: signature, encoding: .utf8),
@@ -51,7 +51,7 @@ enum UpdateSecurity {
         let result = try JSONDecoder().decode(UpdateManifest.self, from: data)
         _ = try AppVersion(result.version)
         _ = try AppVersion(result.minimumSystemVersion)
-        guard result.archive == archiveName, result.size > 0, result.size <= 32 * 1024 * 1024,
+        guard result.archive == archiveName, result.size > 0, result.size <= 300 * 1024 * 1024,
               result.sha256.count == 64, result.sha256.allSatisfy({ "0123456789abcdef".contains($0) }) else { throw UpdateFailure("The signed update information is invalid.") }
         return result
     }
@@ -64,7 +64,7 @@ enum UpdateSecurity {
     }
     static func validateArchivePaths(_ listing: String) throws {
         let paths = listing.split(separator: "\n").map(String.init)
-        guard !paths.isEmpty, paths.count <= 5000 else { throw UpdateFailure("The update archive is empty or too large.") }
+        guard !paths.isEmpty, paths.count <= 30000 else { throw UpdateFailure("The update archive is empty or too large.") }
         for path in paths {
             let pieces = path.split(separator: "/", omittingEmptySubsequences: false)
             guard path == "Daybook.app/" || path.hasPrefix("Daybook.app/"), !path.hasPrefix("/"), !path.contains("\\"),
@@ -81,7 +81,7 @@ enum UpdateSecurity {
               plist["CFBundleExecutable"] as? String == "Daybook" else { throw UpdateFailure("The downloaded app is not the expected Daybook version.") }
         if let items = FileManager.default.enumerator(at: app, includingPropertiesForKeys: [.isSymbolicLinkKey]) {
             for case let item as URL in items {
-                if try item.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true { throw UpdateFailure("Unexpected links were found in the update bundle.") }
+                if try item.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink == true, !item.resolvingSymlinksInPath().path.hasPrefix(app.standardizedFileURL.path + "/") { throw UpdateFailure("An update link points outside its app bundle.") }
             }
         }
         _ = try UpdateProcess.run("/usr/bin/codesign", ["--verify", "--deep", "--strict", app.path], timeout: 30)

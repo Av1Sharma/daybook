@@ -21,6 +21,20 @@
     );
     return `${parts.year}-${parts.month}-${parts.day}`;
   }
+  function rollover(previousInstant, instant, zone, selection, month) {
+    const previousDay = dayKey(previousInstant, zone);
+    const today = dayKey(instant, zone);
+    const followingToday = !selection || selection === previousDay;
+    const changed = previousDay !== today;
+    return {
+      changed,
+      previousDay,
+      today,
+      selection: changed && followingToday ? today : selection,
+      month: changed && followingToday && (!month || month.slice(0, 7) === previousDay.slice(0, 7))
+        ? today.slice(0, 7) + "-01" : month,
+    };
+  }
   function shiftMonth(day, n) {
     const d = parse(day),
       date = d.getUTCDate();
@@ -74,6 +88,7 @@
   const api = {
     addDays,
     dayKey,
+    rollover,
     shiftMonth,
     monday,
     monthDays,

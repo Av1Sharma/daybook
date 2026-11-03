@@ -2673,3 +2673,11 @@ h1 { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fon
  .import-item { grid-template-columns: 1fr 1fr; }
  .import-item-title { grid-column: 1 / -1; }
 }
+
+/* Past days recede visually while their events remain readable and accessible. */
+.month-day.is-past { background: #f0f2ef; color: #626e66; }
+.month-day.is-past .month-chip { background: #e4e8e3; border-left-color: #929d94; color: #526056; }
+.month-day.is-past .month-dots i { background: #929d94; }
+.month-day.is-past .month-more { color: #626e66; }
+.month-day.is-past:hover { background: #e8ede7; }
+.month-day.is-past.selected { background: #e4eae2; }

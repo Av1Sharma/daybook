@@ -46,3 +46,23 @@ test("date labels do not drift when date is formatted", () => {
     "January 2026",
   );
 });
+test("midnight rollover follows today across month and year boundaries", () => {
+  const r = D.rollover("2026-12-31T23:59:00-05:00", "2027-01-01T00:01:00-05:00", "America/New_York", "2026-12-31", "2026-12-01");
+  assert.equal(r.changed, true);
+  assert.equal(r.today, "2027-01-01");
+  assert.equal(r.selection, "2027-01-01");
+  assert.equal(r.month, "2027-01-01");
+});
+test("rollover preserves a manually selected day and browsed month", () => {
+  const r = D.rollover("2026-11-01T23:59:00-05:00", "2026-11-02T00:01:00-05:00", "America/New_York", "2026-10-20", "2026-10-01");
+  assert.equal(r.changed, true);
+  assert.equal(r.selection, "2026-10-20");
+  assert.equal(r.month, "2026-10-01");
+});
+test("DST changes do not advance the calendar until local midnight", () => {
+  const r = D.rollover("2026-11-01T01:59:00-04:00", "2026-11-01T01:01:00-05:00", "America/New_York", "2026-11-01", "2026-11-01");
+  assert.equal(r.changed, false);
+  assert.equal(r.selection, "2026-11-01");
+  const wake = D.rollover("2026-11-01T12:00:00-05:00", "2026-11-04T08:00:00-05:00", "America/New_York", "2026-11-01", "2026-11-01");
+  assert.equal(wake.selection, "2026-11-04");
+});

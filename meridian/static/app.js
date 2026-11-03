@@ -383,7 +383,7 @@ function calendarPage() {
             (e) => `<span class="month-chip ${e.kind}">${esc(e.label)}</span>`,
           )
           .join("");
-        return `<button class="month-day ${day.slice(0, 7) !== calendarMonth.slice(0, 7) ? "outside" : ""} ${day === todayKey ? "is-today" : ""} ${day === selectedDay ? "selected" : ""}" data-day="${day}" aria-label="${Dates.format(day, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}, ${entries.length} items" aria-pressed="${day === selectedDay}" ${day === todayKey ? 'aria-current="date"' : ""} tabindex="${day === selectedDay ? 0 : -1}"><span class="month-number">${Number(day.slice(-2))}</span><span class="month-items">${labels}${entries.length > 2 ? `<span class="month-more">+${entries.length - 2} more</span>` : ""}</span><span class="month-dots" aria-hidden="true">${entries
+        return `<button class="month-day ${day < todayKey ? "is-past" : ""} ${day.slice(0, 7) !== calendarMonth.slice(0, 7) ? "outside" : ""} ${day === todayKey ? "is-today" : ""} ${day === selectedDay ? "selected" : ""}" data-day="${day}" aria-label="${Dates.format(day, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}, ${entries.length} items" aria-pressed="${day === selectedDay}" ${day === todayKey ? 'aria-current="date"' : ""} tabindex="${day === selectedDay ? 0 : -1}"><span class="month-number">${Number(day.slice(-2))}</span><span class="month-items">${labels}${entries.length > 2 ? `<span class="month-more">+${entries.length - 2} more</span>` : ""}</span><span class="month-dots" aria-hidden="true">${entries
           .slice(0, 4)
           .map((e) => `<i class="${e.kind}"></i>`)
           .join("")}</span></button>`;
@@ -1030,6 +1030,32 @@ function bindWorkspace() {
     };
   }
 }
+
+// Advance the local day even when the app stays open overnight or the Mac wakes.
+let pendingDayRender = false;
+function updateCurrentDay() {
+  if (!state) return;
+  const now = new Date().toISOString();
+  const shift = Dates.rollover(state.now, now, state.timezone, selectedDay, calendarMonth);
+  state.now = now;
+  if (shift.changed) {
+    selectedDay = shift.selection;
+    calendarMonth = shift.month;
+    if (reviewWeek === Dates.monday(shift.previousDay))
+      reviewWeek = Dates.monday(shift.today);
+    reviewData = null;
+    pendingDayRender = true;
+  }
+  if (!pendingDayRender || modal.open || document.activeElement?.matches("input, textarea, select")) return;
+  pendingDayRender = false;
+  render();
+}
+setInterval(updateCurrentDay, 30000);
+window.addEventListener("focus", updateCurrentDay);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) updateCurrentDay();
+});
+modal.addEventListener("close", updateCurrentDay);
 
 // Poll only status while editing so forms and reflection drafts never lose focus.
 setInterval(async () => {
